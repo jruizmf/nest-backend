@@ -1,0 +1,47 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserProfile } from '../entities/user-profile.entity';
+import { CreateUserProfileDto } from './dto/create-user-profile.dto';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+
+@Injectable()
+export class UserProfileService {
+  constructor(
+    @InjectRepository(UserProfile)
+    private readonly repository: Repository<UserProfile>,
+  ) {}
+
+  findAll(query: Record<string, string>) {
+    const { sort = 'date_added', page = '1', limit = '100', ...where } = query;
+    return this.repository.find({
+      where: Object.keys(where).length ? where : undefined,
+      order: { [sort]: 'ASC' },
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit),
+    });
+  }
+
+  async findOne(id: string) {
+    const profile = await this.repository.findOneBy({ id });
+    if (!profile) {
+      throw new NotFoundException(`There is no profile with ID:${id}`);
+    }
+    return profile;
+  }
+
+  create(dto: CreateUserProfileDto) {
+    const profile = this.repository.create({ ...dto, date_added: new Date() });
+    return this.repository.save(profile);
+  }
+
+  async update(id: string, dto: UpdateUserProfileDto) {
+    const profile = await this.findOne(id);
+    Object.assign(profile, dto, { date_modified: new Date() });
+    return this.repository.save(profile);
+  }
+
+  async remove(id: string) {
+    await this.repository.delete(id);
+  }
+}
