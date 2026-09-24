@@ -4,9 +4,10 @@ import { User } from './user.entity';
 
 @Entity({ name: 'sessions' })
 export class Session extends UuidEntity {
-  // text, not varchar(600) like the original - the JWT now embeds roles/profile
-  // data (see AuthService.login), which routinely exceeds 600 characters.
-  @Column({ type: 'text' })
+  // Matches the live column: varchar(2000). The original was varchar(600); it was
+  // widened on ALT_ServiceApp because the JWT now embeds roles/profile data
+  // (see AuthService.login) and can exceed 600 characters.
+  @Column({ type: 'varchar', length: 2000 })
   token: string;
 
   @Column({ default: true })

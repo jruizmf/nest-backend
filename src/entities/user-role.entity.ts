@@ -20,12 +20,6 @@ export class UserRole {
   @PrimaryColumn({ name: 'RoleId' })
   roleId: string;
 
-  @CreateDateColumn({ name: 'createdAt', type: 'timestamptz' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updatedAt', type: 'timestamptz' })
-  updatedAt: Date;
-
   @ManyToOne(() => User, (user) => user.userRoles, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'UserId' })
   user: User;
